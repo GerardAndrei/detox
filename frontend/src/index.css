@@ -1,0 +1,548 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=JetBrains+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-quirky: 'Space Grotesk', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #000000;
+  color: #ffffff;
+  overflow-x: hidden;
+  font-weight: 500;
+}
+
+/* Font utilities */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-quirky {
+  font-family: var(--font-quirky);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Custom animations */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(1deg); }
+  50% { transform: translateY(-12px) rotate(-1deg); }
+  75% { transform: translateY(-8px) rotate(1deg); }
+}
+
+@keyframes pulse-scale {
+  0%, 100% { transform: scale(1) skew(0deg); }
+  25% { transform: scale(1.05) skew(-1deg); }
+  50% { transform: scale(1.08) skew(1deg); }
+  75% { transform: scale(1.05) skew(-0.5deg); }
+}
+
+@keyframes rotate-slow {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(1.02); }
+  50% { transform: rotate(180deg) scale(0.98); }
+  75% { transform: rotate(270deg) scale(1.01); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes slide-up {
+  from { 
+    opacity: 0;
+    transform: translateY(40px) skew(-2deg) rotate(2deg); 
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) skew(0deg) rotate(0deg); 
+  }
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-2px) rotate(1deg); }
+  20% { transform: translateX(2px) rotate(-1deg); }
+  30% { transform: translateX(-2px) rotate(1deg); }
+  40% { transform: translateX(2px) rotate(-1deg); }
+  50% { transform: translateX(-1px) rotate(0.5deg); }
+  60% { transform: translateX(1px) rotate(-0.5deg); }
+  70% { transform: translateX(-1px) rotate(0.5deg); }
+  80% { transform: translateX(1px) rotate(-0.5deg); }
+  90% { transform: translateX(-1px) rotate(0deg); }
+}
+
+@keyframes glitch {
+  0%, 100% { transform: translate(0); }
+  10% { transform: translate(-2px, 2px) skew(1deg); }
+  20% { transform: translate(-1px, -1px) skew(-1deg); }
+  30% { transform: translate(1px, 2px) skew(1deg); }
+  40% { transform: translate(1px, -1px) skew(-1deg); }
+  50% { transform: translate(-1px, 1px) skew(1deg); }
+  60% { transform: translate(-1px, 1px) skew(-1deg); }
+  70% { transform: translate(1px, 1px) skew(1deg); }
+  80% { transform: translate(-1px, -1px) skew(-1deg); }
+  90% { transform: translate(1px, 2px) skew(0deg); }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 3s ease-in-out infinite;
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 2s ease-in-out infinite;
+}
+
+.animate-rotate-slow {
+  animation: rotate-slow 20s linear infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s ease-out;
+}
+
+.animate-typewriter {
+  animation: typewriter 2s steps(20) forwards;
+}
+
+/* Bold typography styles */
+.text-mega {
+  font-size: clamp(4rem, 8vw, 8rem);
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+}
+
+.text-giant {
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.text-huge {
+  font-size: clamp(2rem, 4vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.text-big {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+/* Black and white utilities */
+.bg-black { background-color: #000000; }
+.bg-white { background-color: #ffffff; }
+.text-black { color: #000000; }
+.text-white { color: #ffffff; }
+
+/* Bold border styles */
+.border-chunky {
+  border-width: 4px;
+  border-style: solid;
+  border-color: #ffffff;
+}
+
+.border-mega {
+  border-width: 8px;
+  border-style: solid;
+  border-color: #ffffff;
+}
+
+.border-dashed-bold {
+  border-width: 3px;
+  border-style: dashed;
+  border-color: #ffffff;
+}
+
+/* Gritty Animation Classes */
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-glitch {
+  animation: glitch 2s infinite;
+}
+
+.animate-chaotic {
+  animation: pulse-scale 3s ease-in-out infinite, shake 4s ease-in-out infinite;
+}
+
+.animate-brutal {
+  animation: bounce-subtle 2s ease-in-out infinite, glitch 5s ease-in-out infinite;
+}
+
+.animate-gritty-hover:hover {
+  animation: shake 0.3s ease-in-out, glitch 0.5s ease-in-out;
+}
+
+/* Gritty Text Effects */
+.text-gritty {
+  position: relative;
+}
+
+.text-gritty::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 2px;
+  color: rgba(255, 255, 255, 0.1);
+  z-index: -1;
+}
+
+.text-glitch {
+  position: relative;
+}
+
+.text-glitch::before,
+.text-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.text-glitch::before {
+  animation: glitch 2s infinite;
+  color: red;
+  z-index: -1;
+  clip: rect(0, 900px, 0, 0);
+}
+
+.text-glitch::after {
+  animation: glitch 3s infinite reverse;
+  color: blue;
+  z-index: -2;
+  clip: rect(0, 900px, 0, 0);
+}
+
+/* Chaotic Borders */
+.border-chaotic {
+  border-style: solid;
+  border-width: 2px 6px 4px 3px;
+  border-color: currentColor;
+}
+
+.border-brutal {
+  border-style: solid;
+  border-width: 8px 2px 6px 4px;
+  border-color: currentColor;
+}
+
+.border-gritty {
+  border-style: dashed solid dotted double;
+  border-width: 3px;
+  border-color: currentColor;
+}
+
+/* Aggressive Shadows */
+.shadow-brutal {
+  box-shadow: 8px 8px 0px rgba(0, 0, 0, 1), 4px 4px 0px rgba(255, 255, 255, 0.1);
+}
+
+.shadow-chaotic {
+  box-shadow: -6px 10px 0px rgba(0, 0, 0, 0.8), 3px -5px 0px rgba(255, 255, 255, 0.2), 12px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+.shadow-gritty {
+  box-shadow: 
+    2px 2px 0px rgba(0, 0, 0, 1),
+    -1px -1px 0px rgba(255, 255, 255, 0.8),
+    5px 8px 0px rgba(0, 0, 0, 0.6),
+    -3px 6px 0px rgba(255, 255, 255, 0.3);
+}
+.transform-skew {
+  transform: skew(-3deg) rotate(-1deg);
+}
+
+.transform-skew-reverse {
+  transform: skew(3deg) rotate(1deg);
+}
+
+.transform-rotate-1 {
+  transform: rotate(2deg);
+}
+
+.transform-rotate-minus-1 {
+  transform: rotate(-2deg);
+}
+
+.transform-chaos {
+  transform: skew(-2deg) rotate(1deg) scale(1.02);
+}
+
+.transform-chaos-reverse {
+  transform: skew(2deg) rotate(-1deg) scale(0.98);
+}
+
+.transform-aggressive {
+  transform: skew(-4deg) rotate(-2deg) translateY(-2px);
+}
+
+.transform-brutal {
+  transform: skew(5deg) rotate(3deg) scaleX(1.05);
+}
+
+/* Pattern backgrounds */
+.bg-stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #000000 0px,
+    #000000 10px,
+    #ffffff 10px,
+    #ffffff 20px
+  );
+}
+
+.bg-dots {
+  background-image: radial-gradient(circle, #ffffff 2px, transparent 2px);
+  background-size: 30px 30px;
+  background-color: #000000;
+}
+
+.bg-checkerboard {
+  background-image: 
+    linear-gradient(45deg, #ffffff 25%, transparent 25%),
+    linear-gradient(-45deg, #ffffff 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ffffff 75%),
+    linear-gradient(-45deg, transparent 75%, #ffffff 75%);
+  background-size: 40px 40px;
+  background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+  background-color: #000000;
+}
+
+/* Button styles */
+.btn-bold {
+  @apply bg-white text-black font-bold text-xl py-4 px-8 border-4 border-black transition-all duration-200 transform;
+}
+
+.btn-bold:hover {
+  @apply bg-black text-white border-white scale-105;
+}
+
+.btn-outline {
+  @apply bg-transparent text-white font-bold text-xl py-4 px-8 border-4 border-white transition-all duration-200 transform;
+}
+
+.btn-outline:hover {
+  @apply bg-white text-black scale-105;
+}
+
+.btn-invert {
+  @apply bg-black text-white font-bold text-xl py-4 px-8 border-4 border-white transition-all duration-200 transform;
+}
+
+.btn-invert:hover {
+  @apply bg-white text-black border-black scale-105;
+}
+
+/* Card styles */
+.card-bold {
+  @apply bg-white text-black p-8 border-4 border-black transform transition-all duration-300;
+}
+
+.card-bold:hover {
+  @apply transform-rotate-1 scale-105;
+}
+
+.card-invert {
+  @apply bg-black text-white p-8 border-4 border-white transform transition-all duration-300;
+}
+
+.card-invert:hover {
+  @apply transform-rotate-minus-1 scale-105;
+}
+
+/* Form styles */
+.input-bold {
+  @apply bg-white text-black font-semibold text-lg p-4 border-4 border-black focus:border-white focus:bg-black focus:text-white transition-all duration-200 outline-none;
+}
+
+.select-bold {
+  @apply bg-white text-black font-semibold text-lg p-4 border-4 border-black focus:border-white focus:bg-black focus:text-white transition-all duration-200 outline-none appearance-none;
+}
+
+/* Upload zone with better contrast */
+.upload-zone-bold {
+  @apply bg-transparent border-dashed-bold border-white p-8 md:p-12 text-center cursor-pointer transition-all duration-300;
+  color: #ffffff;
+}
+
+.upload-zone-bold:hover {
+  @apply bg-white;
+  color: #000000;
+}
+
+.upload-zone-bold.drag-active {
+  @apply bg-white;
+  color: #000000;
+}
+
+/* Table styles */
+.table-bold {
+  @apply w-full text-lg font-semibold;
+}
+
+.table-bold th {
+  @apply bg-white text-black p-4 border-4 border-black font-bold text-xl;
+}
+
+.table-bold td {
+  @apply bg-black text-white p-4 border-2 border-white;
+}
+
+.table-bold tbody tr:nth-child(even) td {
+  @apply bg-white text-black;
+}
+
+/* Loading spinner */
+.spinner-bold {
+  @apply w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin;
+}
+
+/* Progress bar */
+.progress-bold {
+  @apply w-full h-4 bg-white border-2 border-black;
+}
+
+.progress-fill-bold {
+  @apply h-full bg-black transition-all duration-300;
+}
+
+/* Shadow utilities */
+.shadow-brutal {
+  box-shadow: 8px 8px 0px #ffffff;
+}
+
+.shadow-brutal-invert {
+  box-shadow: 8px 8px 0px #000000;
+}
+
+/* Enhanced responsive utilities with better scaling */
+@media (max-width: 768px) {
+  .text-mega {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+  }
+  
+  .text-giant {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+  
+  .text-huge {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  
+  .text-big {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+  }
+  
+  .btn-bold,
+  .btn-outline,
+  .btn-invert {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    border-width: 2px;
+  }
+  
+  .card-bold,
+  .card-invert {
+    padding: 1rem;
+    border-width: 2px;
+  }
+  
+  .upload-zone-bold {
+    padding: 1.5rem;
+    border-width: 2px;
+  }
+  
+  .border-chunky {
+    border-width: 2px;
+  }
+  
+  .border-mega {
+    border-width: 3px;
+  }
+  
+  .shadow-brutal {
+    box-shadow: 3px 3px 0px #ffffff;
+  }
+  
+  .shadow-brutal-invert {
+    box-shadow: 3px 3px 0px #000000;
+  }
+  
+  /* Mobile-specific optimizations */
+  .animate-rotate-slow {
+    animation-duration: 30s;
+  }
+  
+  .animate-bounce-subtle {
+    animation-duration: 4s;
+  }
+  
+  /* Reduce motion for better mobile performance */
+  .transform-skew {
+    transform: skew(-1.5deg) rotate(-0.5deg);
+  }
+  
+  .transform-skew-reverse {
+    transform: skew(1.5deg) rotate(0.5deg);
+  }
+}
+
+/* Medium screen optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .text-mega {
+    font-size: clamp(4rem, 7vw, 6rem);
+  }
+  
+  .btn-bold,
+  .btn-outline,
+  .btn-invert {
+    font-size: 1.1rem;
+    padding: 0.8rem 1.6rem;
+  }
+}
+
+/* Large screen enhancements */
+@media (min-width: 1025px) {
+  .text-mega {
+    font-size: clamp(6rem, 8vw, 8rem);
+  }
+  
+  /* Enhanced shadows for larger screens */
+  .shadow-brutal {
+    box-shadow: 10px 10px 0px #ffffff, 5px 5px 0px rgba(255, 255, 255, 0.1);
+  }
+  
+  .shadow-brutal-invert {
+    box-shadow: 10px 10px 0px #000000, 5px 5px 0px rgba(0, 0, 0, 0.1);
+  }
+}

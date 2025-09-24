@@ -1,0 +1,119 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env
+.venv
+
+# Build outputs
+frontend/build/
+frontend/dist/
+backend/dist/
+backend/build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Uploads and temporary files
+uploads/
+backend/uploads/
+*.tmp
+*.temp
+
+# Database files
+*.sqlite
+*.db
+
+# Coverage reports
+coverage/
+.nyc_output/
+.coverage
+htmlcov/
+
+# OS generated files
+Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# pytest cache
+.pytest_cache/
+
+# mypy cache
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Tailwind CSS compiled files
+frontend/src/styles/tailwind.css
+
+# Parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output (if using Next.js in future)
+.next/
+
+# Nuxt.js build output (if using Nuxt.js in future)
+.nuxt
+
+# Storybook build outputs
+storybook-static
+
+# Temporary folders
+tmp/
+temp/
