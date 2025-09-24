@@ -13,7 +13,6 @@ const api = axios.create({
 });
 
 // Request queue for managing concurrent requests
-const requestQueue = new Map();
 const maxConcurrentRequests = 3;
 let activeRequests = 0;
 

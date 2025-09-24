@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Skull, 
@@ -7,24 +7,15 @@ import {
   Target, 
   ArrowLeft, 
   Play,
-  AlertTriangle,
-  CheckCircle,
-  X,
-  Trash2
+  CheckCircle
 } from 'lucide-react';
 
 const CleaningOptions = ({ options, onOptionsChange, onClean, onBack, isLoading }) => {
-  const [expandedSection, setExpandedSection] = useState(null);
-
   const handleOptionChange = (key, value) => {
     onOptionsChange({
       ...options,
       [key]: value
     });
-  };
-
-  const toggleSection = (section) => {
-    setExpandedSection(expandedSection === section ? null : section);
   };
 
   const DestructionCard = ({ 

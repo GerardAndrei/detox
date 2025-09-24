@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import { 
@@ -12,13 +12,10 @@ import {
   Target
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { validateFileType, validateFileSize, formatFileSize } from '../services/api';
+import { validateFileType, validateFileSize } from '../services/api';
 
 const FileUpload = ({ onFileUpload, isLoading, serverStatus, onRetryConnection }) => {
-  const [dragActive, setDragActive] = useState(false);
-
   const onDrop = useCallback((acceptedFiles, rejectedFiles) => {
-    setDragActive(false);
     
     // Handle rejected files
     if (rejectedFiles.length > 0) {
@@ -59,8 +56,6 @@ const FileUpload = ({ onFileUpload, isLoading, serverStatus, onRetryConnection }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    onDragEnter: () => setDragActive(true),
-    onDragLeave: () => setDragActive(false),
     accept: {
       'text/csv': ['.csv'],
       'application/vnd.ms-excel': ['.csv']

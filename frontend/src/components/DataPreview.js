@@ -4,16 +4,12 @@ import {
   Skull, 
   Eye, 
   AlertTriangle, 
-  Zap, 
   Target,
   Database,
   Hash,
-  Type,
   ArrowLeft,
   ArrowRight,
-  BarChart3,
-  Bomb,
-  X
+  Bomb
 } from 'lucide-react';
 import { formatNumber, formatPercentage } from '../services/api';
 
@@ -97,8 +93,6 @@ const DataPreview = ({ fileData, onNext, onBack }) => {
   const { 
     basic_info = {}, 
     missing_values = {}, 
-    numeric_statistics = {}, 
-    categorical_statistics = {}, 
     data_quality_issues = {}, 
     sample_data = [] 
   } = profile;

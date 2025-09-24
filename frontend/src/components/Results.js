@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  CheckCircle, 
   Download, 
   RotateCcw, 
   ArrowLeft,
-  BarChart3,
   FileText,
-  TrendingUp,
   AlertTriangle,
-  Info,
   Eye,
   Activity,
   Skull,
