@@ -58,16 +58,20 @@ detox/
 │   ├── tailwind.config.js
 │   └── postcss.config.js
 │
-├── backend/                  # FastAPI backend
-│   ├── main.py
-│   └── requirements.txt
+├── backend/                  # FastAPI backend with performance optimizations
+│   ├── main.py              # Enhanced backend with async processing
+│   ├── requirements.txt
+│   └── uploads/             # File upload directory
 │
-├── cleaner/                  # Data processing modules
+├── cleaner/                 # Data processing modules
 │   ├── __init__.py
-│   ├── profiling.py         # Dataset profiling
-│   ├── cleaning.py          # Cleaning functions
-│   ├── outlier.py           # Outlier detection
-│   └── reporting.py         # Reporting functions
+│   ├── profiling.py         # AI-powered data profiling
+│   ├── cleaning.py          # Core cleaning algorithms
+│   ├── outlier.py           # Outlier detection methods
+│   ├── reporting.py         # Cleaning report generation
+│   ├── optimized_processor.py  # Memory-efficient processing
+│   ├── caching.py           # Multi-tier caching system
+│   └── database.py          # Database operations
 │
 ├── data/
 │   └── sample.csv           # Sample dataset

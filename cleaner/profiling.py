@@ -230,46 +230,293 @@ class AIDataProfiler:
                 "reason": "Only binary values detected"
             }
         
-        # Check if integers could be optimized to smaller int types
-        if str(self.df[col].dtype) == 'int64':
-            min_val, max_val = series.min(), series.max()
-            if min_val >= 0 and max_val <= 255:
-                return {
-                    "current_type": "int64",
-                    "suggested_type": "uint8",
-                    "confidence": 0.9,
-                    "reason": f"Values range {min_val}-{max_val} fits in uint8"
-                }
-            elif min_val >= -128 and max_val <= 127:
-                return {
-                    "current_type": "int64",
-                    "suggested_type": "int8",
-                    "confidence": 0.9,
-                    "reason": f"Values range {min_val}-{max_val} fits in int8"
-                }
-        
         return {"current_type": str(self.df[col].dtype), "suggested_type": str(self.df[col].dtype), "confidence": 1.0, "reason": "Optimal type"}
+    
+    def get_missing_values(self) -> Dict[str, Any]:
+        """
+        Analyze missing values in the dataset with AI insights.
+        
+        Returns:
+            Dict containing missing value statistics and AI recommendations
+        """
+        missing_counts = self.df.isnull().sum()
+        missing_percentages = (missing_counts / len(self.df)) * 100
+        total_cells = self.df.shape[0] * self.df.shape[1]
+        total_missing = missing_counts.sum()
+        total_missing_percentage = (total_missing / total_cells) * 100 if total_cells > 0 else 0
+        
+        # AI-powered missing value strategy recommendations
+        ai_strategies = {}
+        for col in self.df.columns:
+            if missing_counts[col] > 0:
+                strategy = self._recommend_missing_strategy(col, missing_percentages[col])
+                ai_strategies[col] = strategy
+        
+        return {
+            "total_missing": int(total_missing),
+            "total_missing_percentage": float(total_missing_percentage),
+            "column_missing": {k: float(v) for k, v in missing_percentages.to_dict().items()},
+            "missing_by_column": {k: int(v) for k, v in missing_counts.to_dict().items()},
+            "missing_percentages": {k: float(v) for k, v in missing_percentages.to_dict().items()},
+            "columns_with_missing": missing_counts[missing_counts > 0].index.tolist(),
+            "ai_missing_strategies": ai_strategies
+        }
+    
+    def _recommend_missing_strategy(self, col: str, missing_percentage: float) -> Dict[str, Any]:
+        """AI-powered recommendation for handling missing values in a specific column."""
+        dtype = str(self.df[col].dtype)
+        
+        if missing_percentage > 70:
+            return {
+                "strategy": "drop_column",
+                "reason": f"Column has {missing_percentage:.1f}% missing values - consider removal",
+                "confidence": 0.9
+            }
+        elif missing_percentage > 30:
+            if 'object' in dtype:
+                return {
+                    "strategy": "mode_imputation",
+                    "reason": f"High missing rate ({missing_percentage:.1f}%) in categorical column",
+                    "confidence": 0.7
+                }
+            else:
+                return {
+                    "strategy": "median_imputation", 
+                    "reason": f"High missing rate ({missing_percentage:.1f}%) in numeric column",
+                    "confidence": 0.7
+                }
+        else:
+            if 'object' in dtype:
+                return {
+                    "strategy": "mode_imputation",
+                    "reason": f"Low missing rate ({missing_percentage:.1f}%) - mode imputation safe",
+                    "confidence": 0.85
+                }
+            else:
+                return {
+                    "strategy": "mean_imputation",
+                    "reason": f"Low missing rate ({missing_percentage:.1f}%) - mean imputation recommended",
+                    "confidence": 0.85
+                }
+    
+    def get_column_types(self) -> Dict[str, str]:
+        """
+        Get data types for each column.
+        
+        Returns:
+            Dict mapping column names to their data types
+        """
+        return self.df.dtypes.astype(str).to_dict()
+    
+    def get_numeric_statistics(self) -> Dict[str, Dict[str, float]]:
+        """
+        Get statistical summary for numeric columns with AI insights.
+        
+        Returns:
+            Dict containing statistics for each numeric column
+        """
+        numeric_cols = self.df.select_dtypes(include=[np.number]).columns
+        if len(numeric_cols) == 0:
+            return {}
+        
+        stats_dict = {}
+        for col in numeric_cols:
+            try:
+                series = self.df[col].dropna()
+                if len(series) == 0:
+                    continue
+                
+                # Basic statistics
+                basic_stats = {
+                    'count': int(len(series)),
+                    'mean': float(series.mean()),
+                    'std': float(series.std()),
+                    'min': float(series.min()),
+                    'max': float(series.max()),
+                    'median': float(series.median()),
+                    'q1': float(series.quantile(0.25)),
+                    'q3': float(series.quantile(0.75))
+                }
+                
+                # AI-enhanced statistics
+                basic_stats.update({
+                    'skewness': float(series.skew()),
+                    'kurtosis': float(series.kurtosis()),
+                    'outlier_count': self._count_outliers_iqr(series),
+                    'distribution_type': self._classify_distribution(series)
+                })
+                
+                stats_dict[col] = basic_stats
+            except Exception as e:
+                stats_dict[col] = {'error': str(e)}
+        
+        return stats_dict
+    
+    def _count_outliers_iqr(self, series: pd.Series) -> int:
+        """Count outliers using IQR method."""
+        q1, q3 = series.quantile(0.25), series.quantile(0.75)
+        iqr = q3 - q1
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+        return int(((series < lower_bound) | (series > upper_bound)).sum())
+    
+    def _classify_distribution(self, series: pd.Series) -> str:
+        """AI-powered classification of distribution type."""
+        if len(series) < 10:
+            return "insufficient_data"
+        
+        skewness = abs(series.skew())
+        kurtosis = series.kurtosis()
+        
+        if skewness < 0.5:
+            if -0.5 <= kurtosis <= 0.5:
+                return "normal"
+            elif kurtosis > 0.5:
+                return "leptokurtic"  # Heavy tails
+            else:
+                return "platykurtic"  # Light tails
+        elif 0.5 <= skewness < 1:
+            return "moderately_skewed"
+        else:
+            return "highly_skewed"
+    
+    def get_categorical_statistics(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Get statistical summary for categorical columns with AI insights.
+        
+        Returns:
+            Dict containing statistics for each categorical column
+        """
+        categorical_cols = self.df.select_dtypes(include=['object', 'category']).columns
+        if len(categorical_cols) == 0:
+            return {}
+        
+        stats_dict = {}
+        for col in categorical_cols:
+            try:
+                series = self.df[col].dropna()
+                if len(series) == 0:
+                    continue
+                
+                value_counts = series.value_counts()
+                
+                # Basic categorical statistics
+                basic_stats = {
+                    'unique_count': int(series.nunique()),
+                    'most_frequent': str(value_counts.index[0]) if len(value_counts) > 0 else None,
+                    'most_frequent_count': int(value_counts.iloc[0]) if len(value_counts) > 0 else 0,
+                    'total_count': int(len(series))
+                }
+                
+                # AI-enhanced categorical analysis
+                basic_stats.update({
+                    'cardinality_ratio': float(series.nunique() / len(series)) if len(series) > 0 else 0,
+                    'concentration_ratio': float(value_counts.iloc[0] / len(series)) if len(value_counts) > 0 else 0,
+                    'category_recommendation': self._recommend_categorical_treatment(series)
+                })
+                
+                stats_dict[col] = basic_stats
+            except Exception as e:
+                stats_dict[col] = {'error': str(e)}
+        
+        return stats_dict
+    
+    def _recommend_categorical_treatment(self, series: pd.Series) -> Dict[str, Any]:
+        """AI recommendation for categorical column treatment."""
+        unique_count = series.nunique()
+        total_count = len(series)
+        cardinality_ratio = unique_count / total_count if total_count > 0 else 0
+        
+        if cardinality_ratio > 0.9:
+            return {
+                "treatment": "consider_text_analysis",
+                "reason": f"Very high cardinality ({unique_count} unique values)",
+                "confidence": 0.8
+            }
+        elif cardinality_ratio > 0.5:
+            return {
+                "treatment": "group_rare_categories",
+                "reason": f"High cardinality ({unique_count} unique values) - group rare categories",
+                "confidence": 0.7
+            }
+        elif unique_count < 10:
+            return {
+                "treatment": "one_hot_encode",
+                "reason": f"Low cardinality ({unique_count} categories) - good for encoding",
+                "confidence": 0.9
+            }
+        else:
+            return {
+                "treatment": "label_encode",
+                "reason": f"Medium cardinality ({unique_count} categories) - label encoding recommended",
+                "confidence": 0.8
+            }
+    
+    def detect_data_quality_issues(self) -> Dict[str, List[str]]:
+        """
+        Detect various data quality issues with AI-enhanced detection.
+        
+        Returns:
+            Dict mapping issue types to lists of affected columns
+        """
+        issues = {}
+        
+        for col in self.df.columns:
+            col_issues = []
+            series = self.df[col]
+            
+            # High missing value percentage
+            missing_pct = (series.isnull().sum() / len(series)) * 100
+            if missing_pct > 30:
+                col_issues.append(f"High missing values: {missing_pct:.1f}%")
+            
+            # High cardinality for categorical
+            if series.dtype == 'object':
+                cardinality_ratio = series.nunique() / len(series)
+                if cardinality_ratio > 0.8:
+                    col_issues.append(f"Very high cardinality: {series.nunique()} unique values")
+            
+            # Potential data type issues
+            if series.dtype == 'object':
+                # Check for mixed types
+                non_null_series = series.dropna()
+                if len(non_null_series) > 0:
+                    # Check if all values could be numeric
+                    try:
+                        pd.to_numeric(non_null_series, errors='raise')
+                        col_issues.append("Numeric data stored as text")
+                    except:
+                        pass
+            
+            # Outliers in numeric columns
+            if pd.api.types.is_numeric_dtype(series):
+                outlier_count = self._count_outliers_iqr(series.dropna())
+                if outlier_count > len(series) * 0.05:  # More than 5% outliers
+                    col_issues.append(f"High outlier count: {outlier_count}")
+            
+            if col_issues:
+                issues[col] = col_issues
+        
+        return issues
     
     def get_ai_anomaly_detection(self) -> Dict[str, Any]:
         """
         Use AI/ML for advanced anomaly detection across the dataset.
         """
         if not self.ml_available:
-            return {"error": "ML libraries not available"}
+            return {"error": "ML libraries not available", "message": "Install scikit-learn for AI anomaly detection"}
         
-        anomalies = {}
-        
-        # Anomaly detection for numeric columns
-        numeric_cols = self.df.select_dtypes(include=[np.number]).columns
-        if len(numeric_cols) > 0:
-            anomalies["numeric_anomalies"] = self._detect_numeric_anomalies(numeric_cols)
-        
-        # Pattern anomalies for text columns
-        text_cols = self.df.select_dtypes(include=['object']).columns
-        if len(text_cols) > 0:
-            anomalies["text_anomalies"] = self._detect_text_anomalies(text_cols)
-        
-        return anomalies
+        try:
+            anomalies = {}
+            
+            # Anomaly detection for numeric columns
+            numeric_cols = self.df.select_dtypes(include=[np.number]).columns
+            if len(numeric_cols) > 0:
+                anomalies["numeric_anomalies"] = self._detect_numeric_anomalies(numeric_cols)
+            
+            return anomalies
+        except Exception as e:
+            return {"error": f"AI anomaly detection failed: {str(e)}"}
     
     def _detect_numeric_anomalies(self, numeric_cols: List[str]) -> Dict[str, Any]:
         """Use Isolation Forest for numeric anomaly detection."""
@@ -298,191 +545,14 @@ class AIDataProfiler:
         except Exception as e:
             return {"error": f"ML anomaly detection failed: {str(e)}"}
     
-    def _detect_text_anomalies(self, text_cols: List[str]) -> Dict[str, Any]:
-        """Detect text pattern anomalies."""
-        anomalies = {}
-        
-        for col in text_cols[:3]:  # Limit to first 3 text columns
-            try:
-                series = self.df[col].dropna().astype(str)
-                if len(series) == 0:
-                    continue
-                
-                # Length-based anomalies
-                lengths = series.str.len()
-                q1, q3 = lengths.quantile(0.25), lengths.quantile(0.75)
-                iqr = q3 - q1
-                lower_bound = q1 - 1.5 * iqr
-                upper_bound = q3 + 1.5 * iqr
-                
-                length_anomalies = series[(lengths < lower_bound) | (lengths > upper_bound)]
-                
-                # Pattern anomalies (simple)
-                has_numbers = series.str.contains(r'\d', na=False)
-                has_special = series.str.contains(r'[^a-zA-Z0-9\s]', na=False)
-                
-                number_ratio = has_numbers.mean()
-                special_ratio = has_special.mean()
-                
-                anomalies[col] = {
-                    "length_anomalies": len(length_anomalies),
-                    "avg_length": lengths.mean(),
-                    "length_std": lengths.std(),
-                    "number_content_ratio": round(number_ratio, 3),
-                    "special_char_ratio": round(special_ratio, 3)
-                }
-            except:
-                continue
-        
-        return anomalies
-    
-    def get_column_types(self) -> Dict[str, str]:
-        """
-        Get data types for each column.
-        
-        Returns:
-            Dict mapping column names to their data types
-        """
-        return self.df.dtypes.astype(str).to_dict()
-    
-    def get_missing_values(self) -> Dict[str, Any]:
-        """
-        Analyze missing values in the dataset.
-        
-        Returns:
-            Dict containing missing value statistics
-        """
-        missing_counts = self.df.isnull().sum()
-        missing_percentages = (missing_counts / len(self.df)) * 100
-        total_cells = self.df.shape[0] * self.df.shape[1]
-        total_missing = missing_counts.sum()
-        total_missing_percentage = (total_missing / total_cells) * 100 if total_cells > 0 else 0
-        
-        return {
-            "total_missing": int(total_missing),
-            "total_missing_percentage": float(total_missing_percentage),
-            "column_missing": {k: float(v) for k, v in missing_percentages.to_dict().items()},
-            "missing_by_column": {k: int(v) for k, v in missing_counts.to_dict().items()},
-            "missing_percentages": {k: float(v) for k, v in missing_percentages.to_dict().items()},
-            "columns_with_missing": missing_counts[missing_counts > 0].index.tolist()
-        }
-    
-    def get_numeric_statistics(self) -> Dict[str, Dict[str, float]]:
-        """
-        Get statistical summary for numeric columns.
-        
-        Returns:
-            Dict containing statistics for each numeric column
-        """
-        numeric_cols = self.df.select_dtypes(include=[np.number]).columns
-        stats = {}
-        
-        for col in numeric_cols:
-            series = self.df[col].dropna()
-            if len(series) > 0:
-                mean_val = series.mean()
-                median_val = series.median()
-                std_val = series.std()
-                min_val = series.min()
-                max_val = series.max()
-                q25_val = series.quantile(0.25)
-                q75_val = series.quantile(0.75)
-                
-                # Convert NaN to None for JSON serialization
-                stats[col] = {
-                    "mean": float(mean_val) if not pd.isna(mean_val) else 0.0,
-                    "median": float(median_val) if not pd.isna(median_val) else 0.0,
-                    "std": float(std_val) if not pd.isna(std_val) else 0.0,
-                    "min": float(min_val) if not pd.isna(min_val) else 0.0,
-                    "max": float(max_val) if not pd.isna(max_val) else 0.0,
-                    "q25": float(q25_val) if not pd.isna(q25_val) else 0.0,
-                    "q75": float(q75_val) if not pd.isna(q75_val) else 0.0,
-                    "unique_values": int(series.nunique()),
-                    "zeros": int((series == 0).sum()),
-                    "negatives": int((series < 0).sum())
-                }
-        
-        return stats
-    
-    def get_categorical_statistics(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Get statistics for categorical/text columns.
-        
-        Returns:
-            Dict containing statistics for each categorical column
-        """
-        categorical_cols = self.df.select_dtypes(include=['object', 'category']).columns
-        stats = {}
-        
-        for col in categorical_cols:
-            series = self.df[col].dropna()
-            if len(series) > 0:
-                value_counts = series.value_counts()
-                stats[col] = {
-                    "unique_values": int(series.nunique()),
-                    "most_frequent": str(value_counts.index[0]) if len(value_counts) > 0 else None,
-                    "most_frequent_count": int(value_counts.iloc[0]) if len(value_counts) > 0 else 0,
-                    "least_frequent": str(value_counts.index[-1]) if len(value_counts) > 0 else None,
-                    "least_frequent_count": int(value_counts.iloc[-1]) if len(value_counts) > 0 else 0,
-                    "top_5_values": {str(k): int(v) for k, v in value_counts.head(5).to_dict().items()},
-                    "empty_strings": int((series == "").sum()),
-                    "avg_length": float(series.astype(str).str.len().mean())
-                }
-        
-        return stats
-    
-    def detect_data_quality_issues(self) -> Dict[str, List[str]]:
-        """
-        Detect potential data quality issues.
-        
-        Returns:
-            Dict containing lists of issues by category
-        """
-        issues = {
-            "high_missing_columns": [],
-            "high_cardinality_columns": [],
-            "potential_duplicates": [],
-            "mixed_types": [],
-            "outlier_candidates": []
-        }
-        
-        # High missing value columns (>50%)
-        missing_pct = (self.df.isnull().sum() / len(self.df)) * 100
-        issues["high_missing_columns"] = missing_pct[missing_pct > 50].index.tolist()
-        
-        # High cardinality columns (>95% unique for categorical)
-        categorical_cols = self.df.select_dtypes(include=['object', 'category']).columns
-        for col in categorical_cols:
-            unique_pct = (self.df[col].nunique() / len(self.df)) * 100
-            if unique_pct > 95:
-                issues["high_cardinality_columns"].append(col)
-        
-        # Check for potential duplicates
-        if self.df.duplicated().any():
-            issues["potential_duplicates"].append(f"{self.df.duplicated().sum()} duplicate rows found")
-        
-        # Mixed types (basic check for numeric columns with objects)
-        for col in self.df.columns:
-            if self.df[col].dtype == 'object':
-                try:
-                    pd.to_numeric(self.df[col], errors='raise')
-                except:
-                    # Check if it's mixed numeric/text
-                    sample_values = self.df[col].dropna().astype(str).head(100)
-                    numeric_count = sum(1 for val in sample_values if val.replace('.', '').replace('-', '').isdigit())
-                    if 0.1 < numeric_count / len(sample_values) < 0.9:
-                        issues["mixed_types"].append(col)
-        
-        return issues
-    
     def generate_profile(self) -> Dict[str, Any]:
         """
-        Generate a comprehensive profile of the dataset.
+        Generate a comprehensive AI-powered profile of the dataset.
         
         Returns:
-            Dict containing complete dataset profile
+            Dict containing complete dataset profile with AI insights
         """
-        return {
+        profile = {
             "basic_info": self.get_basic_info(),
             "column_types": self.get_column_types(),
             "missing_values": self.get_missing_values(),
@@ -491,27 +561,49 @@ class AIDataProfiler:
             "data_quality_issues": self.detect_data_quality_issues(),
             "sample_data": self.df.head(5).to_dict('records')
         }
-    
+        
+        # Add AI-specific features
+        if self.ml_available:
+            profile["ai_anomaly_detection"] = self.get_ai_anomaly_detection()
+            profile["ai_insights"] = {
+                "ml_features_available": True,
+                "complexity_assessment": profile["basic_info"]["data_complexity_score"],
+                "quality_recommendation": profile["basic_info"]["data_quality_summary"]["ai_recommendation"]
+            }
+        else:
+            profile["ai_insights"] = {
+                "ml_features_available": False,
+                "message": "Install scikit-learn for advanced AI features"
+            }
+        
+        return profile
+
     def generate_detailed_profile(self) -> Dict[str, Any]:
         """
-        Generate a detailed profile with additional metrics.
+        Generate a detailed profile with additional AI metrics.
         
         Returns:
             Dict containing detailed dataset profile
         """
         profile = self.generate_profile()
         
-        # Add correlation matrix for numeric columns
-        numeric_cols = self.df.select_dtypes(include=[np.number]).columns
-        if len(numeric_cols) > 1:
-            correlation_matrix = self.df[numeric_cols].corr()
-            # Convert to native Python types
-            correlations = {}
-            for col1 in correlation_matrix.columns:
-                correlations[col1] = {}
-                for col2 in correlation_matrix.columns:
-                    correlations[col1][col2] = float(correlation_matrix.loc[col1, col2])
-            profile["correlations"] = correlations
+        # Add AI-enhanced features
+        if self.ml_available:
+            # Add correlation analysis for numeric columns
+            numeric_cols = self.df.select_dtypes(include=[np.number]).columns
+            if len(numeric_cols) > 1:
+                try:
+                    correlation_matrix = self.df[numeric_cols].corr()
+                    # Convert to native Python types
+                    correlations = {}
+                    for col1 in correlation_matrix.columns:
+                        correlations[col1] = {}
+                        for col2 in correlation_matrix.columns:
+                            val = correlation_matrix.loc[col1, col2]
+                            correlations[col1][col2] = float(val) if not pd.isna(val) else None
+                    profile["correlations"] = correlations
+                except:
+                    pass
         
         # Add data type recommendations
         profile["type_recommendations"] = self._suggest_data_types()
@@ -558,5 +650,11 @@ class AIDataProfiler:
         
         return suggestions
 
-# Compatibility alias for backward compatibility
-DataProfiler = AIDataProfiler
+
+# Backward compatibility wrapper
+class DataProfiler(AIDataProfiler):
+    """
+    Backward compatibility wrapper for the original DataProfiler.
+    Now powered by AI but maintains the same interface.
+    """
+    pass

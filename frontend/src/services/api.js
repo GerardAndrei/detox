@@ -13,6 +13,7 @@ const api = axios.create({
 });
 
 // Request queue for managing concurrent requests
+const requestQueue = new Map();
 const maxConcurrentRequests = 3;
 let activeRequests = 0;
 
@@ -174,28 +175,6 @@ export const apiService = {
       return response.data;
     } catch (error) {
       console.error('Upload error:', error);
-      throw error;
-    }
-  },
-
-  // Clean dataset with async option
-  async cleanDatasetAsync(fileId, options) {
-    try {
-      const response = await api.post(`/clean/${fileId}/async`, options);
-      return response.data;
-    } catch (error) {
-      console.error('Async cleaning error:', error);
-      throw error;
-    }
-  },
-
-  // Get task status
-  async getTaskStatus(taskId) {
-    try {
-      const response = await api.get(`/task/${taskId}/status`);
-      return response.data;
-    } catch (error) {
-      console.error('Task status error:', error);
       throw error;
     }
   },
