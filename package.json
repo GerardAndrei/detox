@@ -1,0 +1,20 @@
+{
+  "name": "detox",
+  "version": "1.0.0",
+  "description": "DETOX - Modern Data Cleaning Web Application",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd frontend && npm start",
+    "install-frontend": "cd frontend && npm install",
+    "install-backend": "pip install -r requirements.txt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GerardAndrei/detox.git"
+  },
+  "author": "GerardAndrei",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
